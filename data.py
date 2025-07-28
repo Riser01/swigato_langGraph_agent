@@ -298,10 +298,10 @@ _MOCK_ORDERS_DB = {
 }
 
 _MOCK_WIKI_DB = {
-    "gold membership": "Zwigato Gold offers free delivery on orders over rs150 from participating restaurants, exclusive discounts, and priority customer support. It costs 99Rs/month or 999Rs/year.",
-    "zwigato gold benefits": "Zwigato Gold offers free delivery on orders over 150Rs from participating restaurants, exclusive discounts, and priority customer support. It costs 99Rs/month or 999Rs/year.",
-    "zwigato membership": "Zwigato Gold offers free delivery on orders over 150Rs from participating restaurants, exclusive discounts, and priority customer support. It costs 99Rs/month or 999Rs/year.",
-    "membership benefits": "Zwigato Gold offers free delivery on orders over 150Rs from participating restaurants, exclusive discounts, and priority customer support. It costs 99Rs/month or 999Rs/year.",   
+    "gold membership": "Zwigato Gold offers free delivery on orders over $15 from participating restaurants, exclusive discounts, and priority customer support. It costs $9.99/month or $99.99/year.",
+    "zwigato gold benefits": "Zwigato Gold offers free delivery on orders over $15 from participating restaurants, exclusive discounts, and priority customer support. It costs $9.99/month or $99.99/year.",
+    "zwigato membership": "Zwigato Gold offers free delivery on orders over $15 from participating restaurants, exclusive discounts, and priority customer support. It costs $9.99/month or $99.99/year.",
+    "membership benefits": "Zwigato Gold offers free delivery on orders over $15 from participating restaurants, exclusive discounts, and priority customer support. It costs $9.99/month or $99.99/year.",   
     "delivery fees": "Delivery fees vary based on distance from the restaurant and current demand. Zwigato Gold members enjoy free delivery on eligible orders. You'll see the exact fee before confirming your order.",
     "cancel order policy": "You can cancel an order free of charge if the restaurant has not yet started preparing it (usually within 5 minutes of placing or while 'Awaiting Rider Assignment'). After the restaurant starts preparing, a cancellation fee may apply or cancellation might not be possible. Check your order status in the app for cancellation options. Orders already 'Out for Delivery' or 'Delivered' cannot be cancelled.",
     "refund policy": "If you receive a wrong item, a damaged order, or if items are missing, please contact Zwigato support within 2 hours of delivery with your order ID and a photo (if applicable). We'll investigate and process refunds or credits accordingly. For issues noted in your order like for ORDZW010, actions like refunds may have already been processed.",
@@ -323,7 +323,7 @@ _MOCK_WIKI_DB = {
     "how to register restaurant on Zwigato": "Restaurant owners can expand their reach by partnering with Zwigato. Visit zwigato.com/restaurants for information on how to join our platform.",
     "patner with Zwigato": "Restaurant owners can expand their reach by partnering with Zwigato. Visit zwigato.com/restaurants for information on how to join our platform.",
     "restaurant on zwigato": "Restaurant owners can expand their reach by partnering with Zwigato. Visit zwigato.com/restaurants for information on how to join our platform.",
-    "referral program": "Share your Zwigato referral code with friends! When they place their first order, you both get 50Rs off your next meal. Find your code in the 'Promotions' section of the app.",
+    "referral program": "Share your Zwigato referral code with friends! When they place their first order, you both get $5 off your next meal. Find your code in the 'Promotions' section of the app.",
     "allergy information": "Restaurants provide allergy information for their dishes. Please check the item details carefully. For severe allergies, we recommend contacting the restaurant directly before ordering through Zwigato to confirm.",
     "what if my order is late?": "We apologize for any delays. You can track your order's progress in the app. If it's significantly late, please contact Zwigato support for assistance.",
     "rating your order": "After your order is delivered, you can rate the food and the delivery experience. Your feedback helps us and our partners improve!",

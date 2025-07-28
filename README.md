@@ -1,6 +1,17 @@
 # 🍕 Zwigato Customer Support Agent
+<p align="center">
+  <img src="assets/Zwigato_icon.png" alt="Zwigato Logo" width="100" height="100">
+</p>
+
+**Zwigato** is a modern food delivery platform that connects customers with their favorite local restaurants, offering fast and reliable delivery services across multiple cities. Think of it as a comprehensive food ordering ecosystem that brings delicious meals from diverse cuisines right to your doorstep with just a few clicks.
 
 A production-ready customer support chatbot built with **Streamlit**, **LangGraph**, and **dual LLM support** (OpenAI/Google Gemini), featuring MCP (Model Context Protocol) tool integration for order management and knowledge base search.
+
+## 🖥️ Live Demo Interface
+
+![Zwigato Chat Interface Demo](assets/UIimage.png)
+
+*Experience the interactive chat interface with ReAct agent visualization, tool usage tracking, and real-time response streaming*
 
 ## ✨ Key Features
 
