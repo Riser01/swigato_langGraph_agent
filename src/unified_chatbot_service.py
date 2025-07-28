@@ -227,7 +227,6 @@ Be polite, professional, and helpful in all your responses."""
             logger.warning("⚠️  Agent will be created WITHOUT tools (basic responses only)")
 
         try:
-            # Use state_modifier instead of prompt for newer langgraph versions
             agent = create_react_agent(
                 model=self.llm,
                 tools=self.mcp_tools,
@@ -418,9 +417,25 @@ Be polite, professional, and helpful in all your responses."""
             input_data = {"messages": [HumanMessage(content=user_input)]}
 
             logger.info("🤖 ReAct Agent: Starting to process query...")
-            result = self.agent.invoke(input_data, config)
+            
+            # Try async invoke first, fallback to sync
+            try:
+                # Use async invoke if available
+                result = asyncio.run(self.agent.ainvoke(input_data, config))
+            except Exception as async_error:
+                logger.warning(f"⚠️ Async invoke failed: {str(async_error)}, trying sync invoke")
+                try:
+                    result = self.agent.invoke(input_data, config)
+                except Exception as sync_error:
+                    logger.error(f"❌ Both async and sync invoke failed. Async: {async_error}, Sync: {sync_error}")
+                    return {
+                        "response": "I apologize, but I'm having trouble processing your request. Please try again.",
+                        "intermediate_steps": [f"❌ Agent invoke error: {str(sync_error)}"],
+                        "error": str(sync_error),
+                        "tools_used": 0
+                    }
 
-            # --- REFACTORED RESPONSE AND STEP PARSING (FIXED) ---
+            # --- RESPONSE AND STEP PARSING ---
             messages = result.get("messages", [])
             final_response = ""
             intermediate_steps = []
@@ -442,17 +457,14 @@ Be polite, professional, and helpful in all your responses."""
                             intermediate_steps.append(log_msg)
                         logger.info(f"🛠️ ReAct Agent: Found tool call for {tool_name}")
                 
-                # --- THIS IS THE FIX ---
                 # Capture the actual output from the tool
                 elif isinstance(msg, ToolMessage):
-                    log_msg = f"✅ Tool '{msg.tool_call_id}' returned: {msg.content}"
+                    log_msg = f"✅ Tool '{getattr(msg, 'name', msg.tool_call_id)}' returned: {msg.content}"
                     if log_msg not in intermediate_steps:
                         intermediate_steps.append(log_msg)
                     logger.info(log_msg)
 
-
             if not final_response and not any(isinstance(m, AIMessage) and m.tool_calls for m in messages):
-                # Handle cases where the agent might hallucinate a response without deciding to use a tool
                 final_response = "I was unable to find a specific tool for your request. Could you please clarify?"
                 logger.warning("⚠️ Agent did not use a tool and did not provide a clear final answer.")
             elif not final_response:
