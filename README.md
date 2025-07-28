@@ -1,12 +1,13 @@
 # Zwigato Customer Support Agent
 
-A modern customer support chatbot application built with **Streamlit**, **LangGraph**, and **OpenAI API**, fully containerized with Docker.
+A modern customer support chatbot application built with **Streamlit**, **LangGraph**, and **OpenAI/Google Gemini API**, fully containerized with Docker.
 
 ## 🚀 Features
 
 - **Interactive Chat Interface**: Clean and responsive Streamlit UI
 - **Advanced Conversation Management**: LangGraph for state management and conversation flow
-- **OpenAI Integration**: Powered by configurable OpenAI models for intelligent responses
+- **Dual LLM Support**: Powered by OpenAI GPT models (preferred) or Google Gemini (fallback)
+- **Smart Provider Preference**: Automatically prefers OpenAI when available, falls back to Google Gemini
 - **MCP Tools Integration**: Customer support tools for order management and wiki search
 - **Session Management**: Persistent conversation history per session
 - **Real-time Streaming**: Smooth chat experience with streaming responses
@@ -18,8 +19,8 @@ A modern customer support chatbot application built with **Streamlit**, **LangGr
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Streamlit UI  │ ── │   LangGraph      │ ── │   OpenAI API    │
-│   (Frontend)    │    │   (Backend)      │    │   (LLM)         │
+│   Streamlit UI  │ ── │   LangGraph      │ ── │ OpenAI/Gemini   │
+│   (Frontend)    │    │   (Backend)      │    │   API (LLM)     │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
         │                       │                       │
         │              ┌─────────────────┐              │
@@ -32,7 +33,7 @@ A modern customer support chatbot application built with **Streamlit**, **LangGr
 ## 📋 Prerequisites
 
 - Docker and Docker Compose
-- OpenAI API key
+- OpenAI API key OR Google Gemini API key (or both)
 
 ## 🛠️ Quick Start
 
@@ -49,9 +50,22 @@ cd swigato_docker
 # Copy environment template
 cp .env.example .env
 
-# Edit .env file and add your OpenAI API key
+# Edit .env file and add your API key(s)
+# For OpenAI (preferred):
 # OPENAI_API_KEY=your_openai_api_key_here
+
+# For Google Gemini (alternative or fallback):
+# GOOGLE_API_KEY=your_google_api_key_here
+
+# Provider preference (optional, defaults to openai):
+# PROVIDER_PREFERENCE=openai
 ```
+
+**API Key Priority:**
+1. If `PROVIDER_PREFERENCE=openai` and OpenAI key is available → Uses OpenAI
+2. If OpenAI fails or unavailable → Falls back to Google Gemini
+3. If only Google Gemini key is available → Uses Google Gemini
+4. If both keys are available → Uses OpenAI (preferred)
 
 ### 3. Docker Deployment
 
@@ -61,6 +75,9 @@ docker-compose up --build
 
 # Or run in detached mode
 docker-compose up -d --build
+
+Use :
+docker-compose build --no-cache; docker-compose up -d
 ```
 
 ### 4. Access the Application

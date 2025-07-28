@@ -1,26 +1,35 @@
 # 🍕 Zwigato Customer Support Agent - Project Status
 
-## ✅ Project Successfully Created!
+## ✅ Project Successfully Updated!
 
-Your Zwigato Customer Support Agent has been successfully created with all the requested features:
+Your Zwigato Customer Support Agent has been successfully updated with dual LLM provider support:
 
 ### 🏗️ **Architecture Implemented**
 - ✅ **Frontend**: Streamlit with modern chat interface
 - ✅ **Backend**: LangGraph for conversation flow management
-- ✅ **LLM Integration**: OpenAI API (configurable model)
+- ✅ **Dual LLM Support**: OpenAI (preferred) + Google Gemini (fallback)
+- ✅ **Smart Provider Selection**: Automatic failover between providers
 - ✅ **MCP Tools**: Customer support tools integration
 - ✅ **Containerization**: Complete Docker setup
 
-### 📁 **Project Structure**
+### � **NEW: Dual LLM Provider Support**
+- 🥇 **Primary**: OpenAI GPT models (gpt-4.1, gpt-3.5-turbo, etc.)
+- 🥈 **Fallback**: Google Gemini models (gemini-1.5-flash, gemini-pro, etc.)
+- 🧠 **Smart Selection**: Automatically chooses the best available provider
+- ⚙️ **Configurable**: Preference settings via environment variables
+- 🔄 **Failover**: Seamless fallback when primary provider fails
+
+### �📁 **Updated Project Structure**
 ```
 swigato_docker/
-├── 🐍 app.py                    # Main Streamlit application
-├── 📦 requirements.txt          # Python dependencies
+├── 🐍 app.py                    # Main Streamlit application (UPDATED)
+├── 📦 requirements.txt          # Python dependencies (UPDATED)
 ├── 🐳 Dockerfile               # Docker configuration
 ├── 🎛️  docker-compose.yml      # Docker Compose setup
-├── 🔒 .env.example             # Environment template
-├── 📋 README.md                # Comprehensive documentation
-├── 🧪 test_setup.py            # Setup validation tests
+├── 🔒 .env.example             # Environment template (UPDATED)
+├── 🔑 .env                     # Environment variables (UPDATED)
+├── 📋 README.md                # Comprehensive documentation (UPDATED)
+├── 🧪 test_llm_config.py       # LLM configuration test (NEW)
 ├── 💡 example_usage.py         # Usage examples
 ├── 🏥 health_check.sh          # Health check script
 ├── 🚀 run_local.sh/.bat        # Local setup scripts
@@ -29,7 +38,7 @@ swigato_docker/
 │   ├── 🔧 __init__.py
 │   ├── 📊 state.py             # LangGraph state management
 │   ├── 🤖 chatbot_service.py   # OpenAI integration
-│   └── 🔄 conversation_graph.py # LangGraph conversation flow
+│   └── 🔄 conversation_graph.py # LangGraph conversation flow (UPDATED)
 └── 📁 .streamlit/
     └── ⚙️ config.toml           # Streamlit configuration
 ```
@@ -40,14 +49,15 @@ swigato_docker/
 - Interactive chat interface with message history
 - Real-time message display with timestamps
 - Session management and conversation continuity
-- Sidebar with controls and app information
+- Sidebar with controls and app information (UPDATED with provider status)
 - Responsive design with custom themes
 - Clear chat and reset session functionality
+- Dynamic provider status display
 
-#### 🔄 **Backend (LangGraph)**
+#### 🔄 **Backend (LangGraph + Dual LLM)**
 - Stateful conversation management using TypedDict
+- Smart LLM provider selection logic
 - Multi-node graph for processing flow:
-  - Input validation and processing
   - Response generation through OpenAI
   - Conversation finalization and state management
 - Memory persistence across conversation turns

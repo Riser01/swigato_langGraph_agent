@@ -9,7 +9,6 @@ import os
 import asyncio
 from typing import List, Optional
 from loguru import logger
-from langchain_mcp_adapters.tools import load_mcp_tools
 
 
 class MCPClient:
@@ -18,50 +17,68 @@ class MCPClient:
     
     This class manages the connection to the Zwigato customer support MCP server
     and provides methods to load and use the available tools.
+    
+    Note: This is a simplified version that gracefully handles MCP loading failures.
     """
     
     def __init__(self):
         """Initialize the MCP client."""
-        self.mcp_tools = None
-        self.server_config = self._get_server_config()
+        self.mcp_tools = []
         self._load_tools()
-    
-    def _get_server_config(self) -> dict:
-        """
-        Get the MCP server configuration.
-        
-        Returns:
-            Dictionary containing server configuration
-        """
-        return {
-            "CustomerSupportAssistantTools": {
-                "command": "python",
-                "args": ["./mcp_server_remote.py"],
-                "transport": "stdio"
-            }
-        }
     
     def _load_tools(self):
         """Load tools from the MCP server."""
         try:
-            logger.info("Loading MCP tools...")
+            logger.info("Starting MCP tools loading process...")
             
-            # Load tools from the MCP server
-            self.mcp_tools = load_mcp_tools(
-                server_configs=self.server_config,
-                # Optional: specify which tools to load
-                # tool_names=["search_wiki", "read_order_status", "update_order_status"]
-            )
-            
-            logger.success(f"Successfully loaded {len(self.mcp_tools)} MCP tools")
-            
-            # Log available tools
-            for tool in self.mcp_tools:
-                logger.info(f"Available MCP tool: {tool.name}")
+            # Try to import and load MCP tools
+            try:
+                from mcp import ClientSession, StdioServerParameters
+                from mcp.client.stdio import stdio_client
+                from langchain_mcp_adapters.tools import load_mcp_tools
+                
+                logger.info("✅ MCP libraries imported successfully")
+                
+                # Create server parameters for the Zwigato MCP server
+                server_params = StdioServerParameters(
+                    command="python",
+                    args=["./mcp_server_remote.py"]
+                )
+                
+                logger.info(f"📝 MCP server parameters created: {server_params.command} {' '.join(server_params.args)}")
+                
+                # Load MCP tools synchronously using the adapter
+                try:
+                    logger.info("🔄 Attempting to load MCP tools...")
+                    self.mcp_tools = load_mcp_tools(server_params)
+                    
+                    if self.mcp_tools:
+                        logger.success(f"✅ Successfully loaded {len(self.mcp_tools)} MCP tools")
+                        for i, tool in enumerate(self.mcp_tools, 1):
+                            logger.info(f"   {i}. {tool.name} - {getattr(tool, 'description', 'No description')}")
+                    else:
+                        logger.warning("⚠️  MCP tools loaded but list is empty")
+                        
+                except Exception as load_error:
+                    logger.error(f"❌ Failed to load MCP tools from server: {str(load_error)}")
+                    logger.info("🔄 Falling back to no MCP tools")
+                    self.mcp_tools = []
+                
+            except ImportError as e:
+                logger.warning(f"❌ MCP libraries not available: {str(e)}")
+                logger.info("📋 Required packages: mcp, langchain-mcp-adapters")
+                self.mcp_tools = []
                 
         except Exception as e:
-            logger.error(f"Failed to load MCP tools: {str(e)}")
+            logger.error(f"❌ Critical error in MCP tools loading: {str(e)}")
+            logger.exception("Full error details:")
             self.mcp_tools = []
+            
+        # Final status report
+        if self.mcp_tools:
+            logger.success(f"🎉 MCP Client initialized with {len(self.mcp_tools)} tools")
+        else:
+            logger.warning("⚠️  MCP Client initialized with NO tools - running in fallback mode")
     
     def get_tools(self) -> List:
         """
@@ -70,10 +87,14 @@ class MCPClient:
         Returns:
             List of MCP tools ready for use with LangGraph
         """
-        if self.mcp_tools is None:
-            logger.warning("MCP tools not loaded, attempting to reload...")
-            self._load_tools()
+        tool_count = len(self.mcp_tools)
+        logger.info(f"📊 MCP Client - Returning {tool_count} tools")
         
+        if not self.mcp_tools:
+            logger.warning("⚠️  No MCP tools available - agent will run without external tools")
+        else:
+            logger.info(f"🔧 Available tools: {[tool.name for tool in self.mcp_tools]}")
+
         return self.mcp_tools or []
     
     def get_tool_by_name(self, tool_name: str) -> Optional[object]:
@@ -99,7 +120,9 @@ class MCPClient:
         Returns:
             True if tools are loaded, False otherwise
         """
-        return bool(self.mcp_tools)
+        available = bool(self.mcp_tools)
+        logger.debug(f"🔍 MCP Client availability check: {available} (tools: {len(self.mcp_tools)})")
+        return available
     
     def get_available_tool_names(self) -> List[str]:
         """

@@ -74,7 +74,7 @@ class ChatbotApp:
         # Image path for Zwigato logo
         image_path = "https://via.placeholder.com/300x150/FF6B35/FFFFFF?text=Zwigato"  # Placeholder - replace with actual logo
         
-        st.image(image_path, use_container_width=False, width=100)
+        st.image(image_path, width=100)
         st.title("Zwigato Customer Support Agent")
         st.markdown("✨ How can I assist you today?")
     
@@ -84,7 +84,7 @@ class ChatbotApp:
             # Zwigato logo in sidebar
             image_path = "https://via.placeholder.com/300x150/FF6B35/FFFFFF?text=Zwigato"  # Placeholder - replace with actual logo
             st.sidebar.divider()
-            st.sidebar.image(image_path, use_container_width=True, caption="Zwigato Customer Support Agent")
+            st.sidebar.image(image_path, caption="Zwigato Customer Support Agent")
             
             st.header("📋 Chat Information")
             st.write(f"**Session ID:** `{st.session_state.session_id[:8]}...`")
@@ -107,26 +107,66 @@ class ChatbotApp:
             
             st.header("📊 App Info")
             st.write("**Framework:** Streamlit + LangGraph ReAct Agent")
-            model_name = os.getenv("MODEL", "gpt-3.5-turbo")
-            st.write(f"**LLM:** OpenAI {model_name}")
             
-            # Show available MCP tools
-            available_tools = self.conversation_graph.get_available_tools()
-            st.write(f"**MCP Tools:** {len(available_tools)} available")
-            if available_tools:
-                with st.expander("🔧 Available Tools"):
-                    for tool in available_tools:
-                        st.write(f"• {tool}")
+            # Show which LLM provider is actually being used
+            try:
+                provider_info = self.conversation_graph.get_current_provider()
+                st.write(f"**LLM:** {provider_info['provider']} {provider_info['model']}")
+            except Exception as e:
+                # Fallback to environment variable display
+                openai_api_key = os.getenv("OPENAI_API_KEY")
+                google_api_key = os.getenv("GOOGLE_API_KEY")
+                provider_preference = os.getenv("PROVIDER_PREFERENCE", "openai").lower()
+                
+                if provider_preference == "openai" and openai_api_key:
+                    model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+                    st.write(f"**LLM:** OpenAI {model_name}")
+                elif google_api_key:
+                    fallback_model = os.getenv("FALLBACK_MODEL", "gemini-1.5-flash")
+                    st.write(f"**LLM:** Google Gemini {fallback_model}")
+                elif openai_api_key:
+                    model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+                    st.write(f"**LLM:** OpenAI {model_name} (fallback)")
+                else:
+                    st.write("**LLM:** ❌ Not configured")
+            
+            # Show available MCP tools and status
+            try:
+                mcp_status = self.conversation_graph.get_mcp_status()
+                st.write(f"**MCP Status:** {'🟢 Connected' if mcp_status['mcp_available'] else '🔴 Disconnected'}")
+                st.write(f"**MCP Tools:** {mcp_status['tool_count']} available")
+                
+                if mcp_status['tool_names']:
+                    with st.expander("🔧 Available Tools"):
+                        for tool in mcp_status['tool_names']:
+                            st.write(f"• {tool}")
+                else:
+                    st.write("**Tools:** No MCP tools loaded")
+                    
+                # Show detailed MCP info in expander
+                with st.expander("🔍 MCP Details"):
+                    st.json(mcp_status)
+                    
+            except Exception as e:
+                st.write("**MCP Status:** ❌ Error getting status")
+                st.write(f"**Error:** {str(e)}")
+                logger.error(f"Error displaying MCP status: {str(e)}")
             
             st.write("**Version:** 1.0.0 MVP")
             
             # API key status
-            api_key = os.getenv("OPENAI_API_KEY")
-            if api_key:
-                st.write("**API Status:** ✅ Connected")
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+            google_api_key = os.getenv("GOOGLE_API_KEY")
+            
+            if openai_api_key and google_api_key:
+                st.write("**API Status:** ✅ Both OpenAI & Google connected")
+            elif openai_api_key:
+                st.write("**API Status:** ✅ OpenAI connected")
+            elif google_api_key:
+                st.write("**API Status:** ✅ Google Gemini connected")
             else:
-                st.write("**API Status:** ❌ Not Connected")
-                st.error("Please set your OpenAI API key in the .env file")
+                st.write("**API Status:** ❌ Not connected")
+                st.error("Please set either OPENAI_API_KEY or GOOGLE_API_KEY in the .env file")
     
     def display_chat_messages(self):
         """Display the chat message history."""
@@ -248,9 +288,12 @@ class ChatbotApp:
             self.display_sidebar()
             
             # Check API key
-            if not os.getenv("OPENAI_API_KEY"):
-                st.error("⚠️ OpenAI API key not found. Please set OPENAI_API_KEY in your .env file.")
-                st.info("Copy `.env.example` to `.env` and add your OpenAI API key.")
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+            google_api_key = os.getenv("GOOGLE_API_KEY")
+            
+            if not openai_api_key and not google_api_key:
+                st.error("⚠️ No API key found. Please set either OPENAI_API_KEY or GOOGLE_API_KEY in your .env file.")
+                st.info("Copy `.env.example` to `.env` and add your OpenAI API key or Google API key.")
                 return
             
             # Display existing chat messages
