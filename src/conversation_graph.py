@@ -1,6 +1,7 @@
 import uuid
 import os
-from typing import Dict, Any, List, Union
+import warnings
+from typing import Dict, Any, List, Union, Optional
 
 # --- NECESSARY IMPORTS FOR MCP ---
 import asyncio
@@ -13,7 +14,6 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from loguru import logger
 
-from .mcp_client import mcp_client
 from .state import ChatState
 
 # Apply nest_asyncio to allow running async code from sync contexts
@@ -35,9 +35,19 @@ class ConversationGraph:
         # Initialize LLM
         self.llm = self._initialize_llm()
         
-        # --- CORRECTED MCP INITIALIZATION ---
-        self.mcp_client_instance = mcp_client # Store the imported client instance
+        # --- INTEGRATED MCP INITIALIZATION ---
+        self._mcp_client = None
         self.mcp_tools = []
+        self._initialized = False
+        
+        # Default MCP configuration
+        self.mcp_config = {
+            "zwigato-support": {
+                "command": "python",
+                "args": ["./mcp_server_remote.py"],
+                "transport": "stdio"
+            }
+        }
         
         # Run the async tool initialization from the sync __init__ method
         try:
@@ -109,47 +119,48 @@ class ConversationGraph:
     async def _async_initialize_mcp_tools(self):
         """Asynchronously starts the MCP client and loads the tools."""
         try:
-            logger.info("🔄 Entering async MCP client context...")
+            logger.info("🔄 Starting MCP client initialization...")
             
-            # Start the client using its async context manager
-            await self.mcp_client_instance.__aenter__()
-
-            # Check MCP client availability (should be True now)
-            mcp_available = self.mcp_client_instance.is_available()
-            logger.info(f"📊 MCP Client availability: {mcp_available}")
-            
-            if mcp_available:
-                self.mcp_tools = self.mcp_client_instance.get_tools()
-                tool_count = len(self.mcp_tools)
-                logger.success(f"✅ Successfully initialized {tool_count} MCP tools")
+            # Try to import and load MCP tools
+            try:
+                from langchain_mcp_adapters.client import MultiServerMCPClient
+                logger.info("✅ MCP libraries imported successfully")
                 
-                # Log each available tool with details
-                for i, tool in enumerate(self.mcp_tools, 1):
-                    tool_name = getattr(tool, 'name', 'Unknown')
-                    tool_desc = getattr(tool, 'description', 'No description available')
-                    logger.info(f"   🔧 Tool {i}: {tool_name} - {tool_desc[:100]}...")
-                    
-                # Log tool names for easy reference
-                tool_names = [getattr(tool, 'name', 'Unknown') for tool in self.mcp_tools]
-                logger.info(f"🛠️  Tool names: {tool_names}")
+                # Create and initialize the MultiServerMCPClient
+                self._mcp_client = MultiServerMCPClient(self.mcp_config)
                 
-            else:
-                logger.warning("⚠️  MCP client connected but not available, continuing without MCP tools")
+                # Enter the client's async context
+                await self._mcp_client.__aenter__()
+                logger.info("✅ MCP client context entered successfully")
+                
+                # Load MCP tools
+                self.mcp_tools = self._mcp_client.mcp_tools
+                
+                if self.mcp_tools:
+                    logger.success(f"✅ Successfully loaded {len(self.mcp_tools)} MCP tools")
+                    for i, tool in enumerate(self.mcp_tools, 1):
+                        logger.info(f"   {i}. {tool.name} - {getattr(tool, 'description', 'No description')}")
+                else:
+                    logger.warning("⚠️  MCP tools loaded but list is empty")
+                
+                self._initialized = True
+                
+            except ImportError as e:
+                logger.warning(f"❌ MCP libraries not available: {str(e)}")
+                logger.info("📋 Required packages: langchain-mcp-adapters")
                 self.mcp_tools = []
                 
         except Exception as e:
-            logger.error(f"❌ Failed to initialize MCP tools: {str(e)}")
+            logger.error(f"❌ Critical error in MCP client initialization: {str(e)}")
             logger.exception("Full error details:")
             self.mcp_tools = []
-            # Attempt to clean up if entry failed partially
-            await self.cleanup()
+            await self._cleanup_mcp()
             
-        # Final summary
-        final_count = len(self.mcp_tools)
-        if final_count > 0:
-            logger.success(f"🎉 MCP tools initialization complete: {final_count} tools ready")
+        # Final status report
+        if self.mcp_tools:
+            logger.success(f"🎉 MCP Client initialized with {len(self.mcp_tools)} tools")
         else:
-            logger.warning("⚠️  MCP tools initialization complete: 0 tools (fallback mode)")
+            logger.warning("⚠️  MCP Client initialized with NO tools - running in fallback mode")
 
     def _create_react_agent(self):
         """Create a ReAct agent with MCP tools."""
@@ -223,16 +234,21 @@ Source: (if applicable)
             logger.exception("Full error details:")
             raise
 
-    # --- ADDED CLEANUP METHOD ---
+    async def _cleanup_mcp(self):
+        """Cleanup MCP client resources."""
+        if self._mcp_client:
+            try:
+                logger.info("🔌 Shutting down MCP client...")
+                await self._mcp_client.__aexit__(None, None, None)
+                self._mcp_client = None
+                self._initialized = False
+                logger.info("✅ MCP client shutdown complete")
+            except Exception as e:
+                logger.error(f"❌ Error during MCP client cleanup: {str(e)}")
+
     async def cleanup(self):
         """Gracefully shuts down the MCP client and its subprocesses."""
-        if hasattr(self, 'mcp_client_instance') and self.mcp_client_instance:
-            logger.info("🔌 Shutting down MCP client...")
-            try:
-                await self.mcp_client_instance.__aexit__(None, None, None)
-                logger.success("✅ MCP client shut down successfully.")
-            except Exception as e:
-                logger.error(f"❌ Error during MCP client cleanup: {e}")
+        await self._cleanup_mcp()
     
     def chat(self, user_input: str, session_id: str) -> Dict[str, Any]:
         """
@@ -388,7 +404,7 @@ Source: (if applicable)
             Dictionary with MCP status details
         """
         try:
-            mcp_available = self.mcp_client_instance.is_available()
+            mcp_available = self.is_mcp_available()
             tool_count = len(self.mcp_tools)
             tool_names = self.get_available_tools()
             
@@ -396,7 +412,7 @@ Source: (if applicable)
                 "mcp_available": mcp_available,
                 "tool_count": tool_count,
                 "tool_names": tool_names,
-                "mcp_client_tools": len(self.mcp_client_instance.mcp_tools),
+                "mcp_client_tools": len(self.mcp_tools) if self._mcp_client else 0,
                 "connection_status": "Connected" if mcp_available else "Disconnected"
             }
             
@@ -413,6 +429,48 @@ Source: (if applicable)
                 "connection_status": "Error",
                 "error": str(e)
             }
+
+    def is_mcp_available(self) -> bool:
+        """
+        Check if MCP tools are available.
+        
+        Returns:
+            True if tools are loaded, False otherwise
+        """
+        available = bool(self.mcp_tools and self._initialized)
+        logger.debug(f"🔍 MCP availability check: {available} (tools: {len(self.mcp_tools)}, initialized: {self._initialized})")
+        return available
+
+    def get_tool_by_name(self, tool_name: str) -> Optional[object]:
+        """
+        Get a specific tool by name.
+        
+        Args:
+            tool_name: Name of the tool to retrieve
+            
+        Returns:
+            The tool if found, None otherwise
+        """
+        for tool in self.mcp_tools:
+            if tool.name == tool_name:
+                return tool
+        return None
+
+    def describe_tools(self) -> str:
+        """
+        Get a description of all available tools.
+        
+        Returns:
+            String description of tools
+        """
+        if not self.mcp_tools:
+            return "No MCP tools available"
+        
+        descriptions = []
+        for tool in self.mcp_tools:
+            descriptions.append(f"- {tool.name}: {getattr(tool, 'description', 'No description available')}")
+        
+        return "Available MCP Tools:\n" + "\n".join(descriptions)
 
     def get_conversation_history(self, session_id: str) -> List[Dict[str, Any]]:
         """
