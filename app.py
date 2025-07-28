@@ -227,7 +227,7 @@ class ChatbotApp:
                     
                     # Display intermediate steps if any
                     if intermediate_steps:
-                        with st.expander(f"🔍 ReAct Process ({len(intermediate_steps)} steps, {tools_used} tools used)", expanded=False):
+                        with st.expander(f"🔍 ReAct Process ({len(intermediate_steps)} steps, {tools_used} tools used)", expanded=True):
                             for i, step in enumerate(intermediate_steps, 1):
                                 st.text(f"{i}. {step}")
                     
