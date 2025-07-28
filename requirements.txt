@@ -17,3 +17,5 @@ loguru==0.7.2
 
 # For session state management - using built-in uuid instead
 # uuid==1.30
+
+nest-asyncio>=1.6.0

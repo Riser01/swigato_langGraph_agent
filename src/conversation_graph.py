@@ -1,6 +1,11 @@
 import uuid
 import os
 from typing import Dict, Any, List, Union
+
+# --- NECESSARY IMPORTS FOR MCP ---
+import asyncio
+import nest_asyncio
+
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
@@ -10,6 +15,9 @@ from loguru import logger
 
 from .mcp_client import mcp_client
 from .state import ChatState
+
+# Apply nest_asyncio to allow running async code from sync contexts
+nest_asyncio.apply()
 
 
 class ConversationGraph:
@@ -21,17 +29,28 @@ class ConversationGraph:
     """
     
     def __init__(self):
-        """Initialize the ReAct agent."""
+        """Initialize the ReAct agent and MCP Client."""
         self.memory = MemorySaver()  # In-memory state persistence
         
         # Initialize LLM
         self.llm = self._initialize_llm()
         
-        # Initialize MCP tools
+        # --- CORRECTED MCP INITIALIZATION ---
+        self.mcp_client_instance = mcp_client # Store the imported client instance
         self.mcp_tools = []
-        self._initialize_mcp_tools()
         
-        # Create the ReAct agent
+        # Run the async tool initialization from the sync __init__ method
+        try:
+            logger.info("Starting MCP client initialization...")
+            # This blocks until the async method is complete.
+            asyncio.run(self._async_initialize_mcp_tools())
+        except Exception as e:
+            logger.error(f"❌ Critical error during MCP initialization: {e}")
+            # Ensure agent is created even if MCP fails
+            self.agent = self._create_react_agent()
+            return
+            
+        # Create the ReAct agent after tools have been initialized
         self.agent = self._create_react_agent()
     
     def _initialize_llm(self) -> Union[ChatOpenAI, ChatGoogleGenerativeAI]:
@@ -86,18 +105,21 @@ class ConversationGraph:
         raise ValueError(
             "No valid API key found. Please set either OPENAI_API_KEY or GOOGLE_API_KEY environment variable."
         )
-    
-    def _initialize_mcp_tools(self):
-        """Initialize MCP tools for customer support."""
+
+    async def _async_initialize_mcp_tools(self):
+        """Asynchronously starts the MCP client and loads the tools."""
         try:
-            logger.info("🔄 Initializing MCP tools for customer support...")
+            logger.info("🔄 Entering async MCP client context...")
             
-            # Check MCP client availability
-            mcp_available = mcp_client.is_available()
+            # Start the client using its async context manager
+            await self.mcp_client_instance.__aenter__()
+
+            # Check MCP client availability (should be True now)
+            mcp_available = self.mcp_client_instance.is_available()
             logger.info(f"📊 MCP Client availability: {mcp_available}")
             
             if mcp_available:
-                self.mcp_tools = mcp_client.get_tools()
+                self.mcp_tools = self.mcp_client_instance.get_tools()
                 tool_count = len(self.mcp_tools)
                 logger.success(f"✅ Successfully initialized {tool_count} MCP tools")
                 
@@ -112,14 +134,15 @@ class ConversationGraph:
                 logger.info(f"🛠️  Tool names: {tool_names}")
                 
             else:
-                logger.warning("⚠️  MCP client not available, continuing without MCP tools")
-                logger.info("📋 This means the agent will work with basic responses only")
+                logger.warning("⚠️  MCP client connected but not available, continuing without MCP tools")
                 self.mcp_tools = []
                 
         except Exception as e:
             logger.error(f"❌ Failed to initialize MCP tools: {str(e)}")
             logger.exception("Full error details:")
             self.mcp_tools = []
+            # Attempt to clean up if entry failed partially
+            await self.cleanup()
             
         # Final summary
         final_count = len(self.mcp_tools)
@@ -127,7 +150,7 @@ class ConversationGraph:
             logger.success(f"🎉 MCP tools initialization complete: {final_count} tools ready")
         else:
             logger.warning("⚠️  MCP tools initialization complete: 0 tools (fallback mode)")
-    
+
     def _create_react_agent(self):
         """Create a ReAct agent with MCP tools."""
         # Store system message for later use in chat method
@@ -185,19 +208,31 @@ Source: (if applicable)
 
         # Create the ReAct agent
         try:
-            self.agent = create_react_agent(
+            # This self.agent assignment is correctly placed
+            agent = create_react_agent(
                 model=self.llm,
                 tools=self.mcp_tools,
                 checkpointer=self.memory
             )
             
             logger.success(f"✅ ReAct agent created successfully with {tool_count} tools")
-            return self.agent
+            return agent
             
         except Exception as e:
             logger.error(f"❌ Failed to create ReAct agent: {str(e)}")
             logger.exception("Full error details:")
             raise
+
+    # --- ADDED CLEANUP METHOD ---
+    async def cleanup(self):
+        """Gracefully shuts down the MCP client and its subprocesses."""
+        if hasattr(self, 'mcp_client_instance') and self.mcp_client_instance:
+            logger.info("🔌 Shutting down MCP client...")
+            try:
+                await self.mcp_client_instance.__aexit__(None, None, None)
+                logger.success("✅ MCP client shut down successfully.")
+            except Exception as e:
+                logger.error(f"❌ Error during MCP client cleanup: {e}")
     
     def chat(self, user_input: str, session_id: str) -> Dict[str, Any]:
         """
@@ -223,7 +258,7 @@ Source: (if applicable)
                     SystemMessage(content=self.system_message),
                     HumanMessage(content=user_input)
                 ]
-                llm_result = self.llm(messages)
+                llm_result = self.llm.invoke(messages)
                 if hasattr(llm_result, "generations"):
                     content = llm_result.generations[0][0].text
                 elif hasattr(llm_result, "content"):
@@ -353,7 +388,7 @@ Source: (if applicable)
             Dictionary with MCP status details
         """
         try:
-            mcp_available = mcp_client.is_available()
+            mcp_available = self.mcp_client_instance.is_available()
             tool_count = len(self.mcp_tools)
             tool_names = self.get_available_tools()
             
@@ -361,7 +396,7 @@ Source: (if applicable)
                 "mcp_available": mcp_available,
                 "tool_count": tool_count,
                 "tool_names": tool_names,
-                "mcp_client_tools": len(mcp_client.mcp_tools),
+                "mcp_client_tools": len(self.mcp_client_instance.mcp_tools),
                 "connection_status": "Connected" if mcp_available else "Disconnected"
             }
             
