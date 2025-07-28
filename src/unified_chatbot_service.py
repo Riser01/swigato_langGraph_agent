@@ -227,12 +227,12 @@ Be polite, professional, and helpful in all your responses."""
             logger.warning("⚠️  Agent will be created WITHOUT tools (basic responses only)")
 
         try:
-            # FIX: Use the 'prompt' argument for older langgraph versions
+            # Use state_modifier instead of prompt for newer langgraph versions
             agent = create_react_agent(
                 model=self.llm,
                 tools=self.mcp_tools,
                 checkpointer=self.memory,
-                prompt=self.react_system_message
+                state_modifier=self.react_system_message
             )
 
             logger.success(f"✅ ReAct agent created successfully with {tool_count} tools")
@@ -420,31 +420,44 @@ Be polite, professional, and helpful in all your responses."""
             logger.info("🤖 ReAct Agent: Starting to process query...")
             result = self.agent.invoke(input_data, config)
 
-            # --- REFACTORED RESPONSE AND STEP PARSING ---
+            # --- REFACTORED RESPONSE AND STEP PARSING (FIXED) ---
             messages = result.get("messages", [])
             final_response = ""
             intermediate_steps = []
             tools_used_count = 0
 
-            # The final response is the content of the last AIMessage in the sequence
             if messages and isinstance(messages[-1], AIMessage):
                 final_response = messages[-1].content
                 logger.info("💬 ReAct Agent: Final response captured")
 
-            # Collect all tool usage steps from the conversation history
+            # Collect all tool usage and result steps from the conversation history
             for msg in messages:
                 if isinstance(msg, AIMessage) and msg.tool_calls:
                     for tool_call in msg.tool_calls:
                         tools_used_count += 1
                         tool_name = tool_call.get('name', 'Unknown')
-                        log_msg = f"🛠️  Using tool: {tool_name}"
+                        tool_args = tool_call.get('args', {})
+                        log_msg = f"🛠️ Agent decided to use tool: {tool_name} with args {tool_args}"
                         if log_msg not in intermediate_steps:
-                             intermediate_steps.append(log_msg)
-                        logger.info(f"🛠️  ReAct Agent: Found tool call for {tool_name}")
+                            intermediate_steps.append(log_msg)
+                        logger.info(f"🛠️ ReAct Agent: Found tool call for {tool_name}")
+                
+                # --- THIS IS THE FIX ---
+                # Capture the actual output from the tool
+                elif isinstance(msg, ToolMessage):
+                    log_msg = f"✅ Tool '{msg.tool_call_id}' returned: {msg.content}"
+                    if log_msg not in intermediate_steps:
+                        intermediate_steps.append(log_msg)
+                    logger.info(log_msg)
 
-            if not final_response:
-                final_response = "I apologize, but I couldn't generate a proper response. Please try rephrasing your question."
-                logger.warning("⚠️  No final response captured from agent, using fallback message.")
+
+            if not final_response and not any(isinstance(m, AIMessage) and m.tool_calls for m in messages):
+                # Handle cases where the agent might hallucinate a response without deciding to use a tool
+                final_response = "I was unable to find a specific tool for your request. Could you please clarify?"
+                logger.warning("⚠️ Agent did not use a tool and did not provide a clear final answer.")
+            elif not final_response:
+                final_response = "I've processed your request, but I'm having trouble formulating a final response. Please check the steps to see the result."
+                logger.warning("⚠️ No final response captured from agent, using fallback message.")
 
             logger.success(f"✅ ReAct agent completed processing (Tools used: {tools_used_count})")
 
@@ -531,8 +544,7 @@ Be polite, professional, and helpful in all your responses."""
 
         descriptions = []
         for tool in self.mcp_tools:
-            descriptions.append(f"- {tool.name}: {getattr(tool, 'description',
-'No description available')}")
+            descriptions.append(f"- {tool.name}: {getattr(tool, 'description', 'No description available')}")
 
         return "Available MCP Tools:\n" + "\n".join(descriptions)
 
