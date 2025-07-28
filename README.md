@@ -170,14 +170,87 @@ swigato_langGraph_agent/
 
 ## 🏗️ Architecture
 
-The application follows a modular architecture:
+The application follows a modular architecture with clear separation of concerns:
 
-- **Frontend**: Streamlit provides the web interface
-- **Backend**: LangGraph ReAct agent handles conversation flow
-- **LLM Integration**: Dual provider support with automatic failover
-- **Tools**: MCP server provides order management and knowledge base
-- **State Management**: Session-based conversation persistence
-- **Logging**: Comprehensive logging with rotation
+### 🔄 User Interaction Flow
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│                 │    │                  │    │                 │
+│      USER       │◄──►│   STREAMLIT UI   │◄──►│  LANGGRAPH      │
+│                 │    │                  │    │  REACT AGENT    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │                        │
+                                │                        ▼
+                                │               ┌─────────────────┐
+                                │               │                 │
+                                │               │   LLM LAYER     │
+                                │               │ OpenAI/Gemini   │
+                                │               │   + Failover    │
+                                │               └─────────────────┘
+                                │                        │
+                                ▼                        ▼
+                       ┌──────────────────┐    ┌─────────────────┐
+                       │                  │    │                 │
+                       │ SESSION STATE    │    │   MCP TOOLS     │
+                       │   Management     │    │   Integration   │
+                       │                  │    │                 │
+                       └──────────────────┘    └─────────────────┘
+                                                         │
+                                                         ▼
+                                                ┌─────────────────┐
+                                                │                 │
+                                                │  ZWIGATO DATA   │
+                                                │ Orders & Wiki   │
+                                                │                 │
+                                                └─────────────────┘
+```
+
+### 📊 Interaction Steps
+
+1. **👤 User Input**: User types message in Streamlit chat interface
+2. **🔄 Session Management**: Message added to session state with timestamp
+3. **🤖 ReAct Processing**: LangGraph agent analyzes user intent
+4. **🧠 LLM Decision**: Primary LLM (OpenAI/Gemini) determines response strategy
+5. **🛠️ Tool Selection**: Agent decides if MCP tools are needed:
+   - **Order Management**: For order status, cancellations, tracking
+   - **Wiki Search**: For policies, membership info, general help
+6. **📊 Tool Execution**: MCP server processes tool requests
+7. **💭 Response Generation**: LLM synthesizes final response
+8. **✨ UI Display**: Response shown with ReAct process visualization
+9. **📝 State Update**: Conversation history and session updated
+
+### 🏛️ Component Architecture
+
+- **🎨 Frontend Layer**: 
+  - Streamlit web interface with real-time chat
+  - Session management and conversation history
+  - ReAct process visualization and tool usage tracking
+
+- **🧠 Agent Layer**: 
+  - LangGraph ReAct agent for conversation flow
+  - Intent recognition and tool selection logic
+  - Intermediate step tracking and reasoning display
+
+- **🔧 LLM Integration**: 
+  - Dual provider support (OpenAI GPT + Google Gemini)
+  - Automatic failover mechanism
+  - Dynamic model switching based on availability
+
+- **⚙️ Tool Layer**: 
+  - MCP (Model Context Protocol) server integration
+  - Order management tools (status, cancellation, tracking)
+  - Knowledge base search for policies and information
+
+- **💾 Data Layer**: 
+  - Session-based conversation persistence
+  - Mock Zwigato order database
+  - Customer support knowledge base (wiki)
+
+- **📊 Infrastructure**: 
+  - Docker containerization with health checks
+  - Comprehensive logging with rotation
+  - Environment-based configuration management
 ## 🚨 Troubleshooting
 
 ### Common Issues

@@ -71,8 +71,8 @@ class ChatbotApp:
     
     def display_header(self):
         """Display the application header."""
-        # Image path for Zwigato logo
-        image_path = "https://via.placeholder.com/300x150/FF6B35/FFFFFF?text=Zwigato"  # Placeholder - replace with actual logo
+        # Use the actual Zwigato logo
+        image_path = "assets/Zwigato_icon.png"
         
         st.image(image_path, width=100)
         st.title("Zwigato Customer Support Agent")
@@ -82,7 +82,7 @@ class ChatbotApp:
         """Display the sidebar with app information and controls."""
         with st.sidebar:
             # Zwigato logo in sidebar
-            image_path = "https://via.placeholder.com/300x150/FF6B35/FFFFFF?text=Zwigato"  # Placeholder - replace with actual logo
+            image_path = "assets/Zwigato_icon.png"
             st.sidebar.divider()
             st.sidebar.image(image_path, caption="Zwigato Customer Support Agent")
             
