@@ -9,7 +9,7 @@ from loguru import logger
 load_dotenv()
 
 # Import our custom modules
-from src.conversation_graph import ConversationGraph
+from src.unified_chatbot_service import UnifiedChatbotService
 
 
 class ChatbotApp:
@@ -47,12 +47,12 @@ class ChatbotApp:
         )
     
     def initialize_graph(self):
-        """Initialize the conversation graph."""
+        """Initialize the unified chatbot service."""
         try:
-            self.conversation_graph = ConversationGraph()
-            logger.info("Conversation graph initialized successfully")
+            self.chatbot_service = UnifiedChatbotService()
+            logger.info("Unified chatbot service initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize conversation graph: {str(e)}")
+            logger.error(f"Failed to initialize chatbot service: {str(e)}")
             st.error("Failed to initialize the chatbot. Please check your configuration.")
             st.stop()
     
@@ -110,7 +110,7 @@ class ChatbotApp:
             
             # Show which LLM provider is actually being used
             try:
-                provider_info = self.conversation_graph.get_current_provider()
+                provider_info = self.chatbot_service.get_current_provider()
                 st.write(f"**LLM:** {provider_info['provider']} {provider_info['model']}")
             except Exception as e:
                 # Fallback to environment variable display
@@ -132,7 +132,7 @@ class ChatbotApp:
             
             # Show available MCP tools and status
             try:
-                mcp_status = self.conversation_graph.get_mcp_status()
+                mcp_status = self.chatbot_service.get_mcp_status()
                 st.write(f"**MCP Status:** {'🟢 Connected' if mcp_status['mcp_available'] else '🔴 Disconnected'}")
                 st.write(f"**MCP Tools:** {mcp_status['tool_count']} available")
                 
@@ -211,7 +211,7 @@ class ChatbotApp:
             with st.spinner("🤖 ReAct Agent is thinking..."):
                 try:
                     # Process message through conversation graph
-                    response_data = self.conversation_graph.chat(
+                    response_data = self.chatbot_service.chat(
                         user_input=user_input,
                         session_id=st.session_state.session_id
                     )
