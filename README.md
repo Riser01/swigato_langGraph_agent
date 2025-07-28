@@ -1,12 +1,13 @@
-# AI Chatbot MVP
+# Zwigato Customer Support Agent
 
-A modern chatbot application built with **Streamlit**, **LangGraph**, and **OpenAI API**, fully containerized with Docker.
+A modern customer support chatbot application built with **Streamlit**, **LangGraph**, and **OpenAI API**, fully containerized with Docker.
 
 ## 🚀 Features
 
 - **Interactive Chat Interface**: Clean and responsive Streamlit UI
 - **Advanced Conversation Management**: LangGraph for state management and conversation flow
-- **OpenAI Integration**: Powered by GPT-3.5-turbo for intelligent responses
+- **OpenAI Integration**: Powered by configurable OpenAI models for intelligent responses
+- **MCP Tools Integration**: Customer support tools for order management and wiki search
 - **Session Management**: Persistent conversation history per session
 - **Real-time Streaming**: Smooth chat experience with streaming responses
 - **Docker Containerization**: Easy deployment anywhere

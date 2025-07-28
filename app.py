@@ -30,8 +30,8 @@ class ChatbotApp:
     def setup_page_config(self):
         """Configure the Streamlit page settings."""
         st.set_page_config(
-            page_title=os.getenv("APP_TITLE", "AI Chatbot MVP"),
-            page_icon="🤖",
+            page_title=os.getenv("APP_TITLE", "Zwigato Customer Support Agent"),
+            page_icon="🍕",
             layout="wide",
             initial_sidebar_state="expanded"
         )
@@ -71,17 +71,21 @@ class ChatbotApp:
     
     def display_header(self):
         """Display the application header."""
-        st.title("🤖 AI Chatbot MVP")
-        st.markdown("""
-        Welcome to the AI Chatbot MVP! This chatbot is powered by:
-        - **LangGraph** for conversation flow management
-        - **OpenAI GPT-3.5-turbo** for intelligent responses  
-        - **Streamlit** for the user interface
-        """)
+        # Image path for Zwigato logo
+        image_path = "https://via.placeholder.com/300x150/FF6B35/FFFFFF?text=Zwigato"  # Placeholder - replace with actual logo
+        
+        st.image(image_path, use_container_width=False, width=100)
+        st.title("Zwigato Customer Support Agent")
+        st.markdown("✨ How can I assist you today?")
     
     def display_sidebar(self):
         """Display the sidebar with app information and controls."""
         with st.sidebar:
+            # Zwigato logo in sidebar
+            image_path = "https://via.placeholder.com/300x150/FF6B35/FFFFFF?text=Zwigato"  # Placeholder - replace with actual logo
+            st.sidebar.divider()
+            st.sidebar.image(image_path, use_container_width=True, caption="Zwigato Customer Support Agent")
+            
             st.header("📋 Chat Information")
             st.write(f"**Session ID:** `{st.session_state.session_id[:8]}...`")
             st.write(f"**Messages:** {len(st.session_state.messages)}")
@@ -102,8 +106,18 @@ class ChatbotApp:
             st.divider()
             
             st.header("📊 App Info")
-            st.write("**Framework:** Streamlit + LangGraph")
-            st.write("**LLM:** OpenAI GPT-3.5-turbo")
+            st.write("**Framework:** Streamlit + LangGraph ReAct Agent")
+            model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+            st.write(f"**LLM:** OpenAI {model_name}")
+            
+            # Show available MCP tools
+            available_tools = self.conversation_graph.get_available_tools()
+            st.write(f"**MCP Tools:** {len(available_tools)} available")
+            if available_tools:
+                with st.expander("🔧 Available Tools"):
+                    for tool in available_tools:
+                        st.write(f"• {tool}")
+            
             st.write("**Version:** 1.0.0 MVP")
             
             # API key status
@@ -119,6 +133,14 @@ class ChatbotApp:
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
+                
+                # Show intermediate steps for assistant messages if available
+                if message["role"] == "assistant" and message.get("intermediate_steps"):
+                    intermediate_steps = message["intermediate_steps"]
+                    tools_used = message.get("tools_used", 0)
+                    with st.expander(f"🔍 ReAct Process ({len(intermediate_steps)} steps, {tools_used} tools used)", expanded=False):
+                        for i, step in enumerate(intermediate_steps, 1):
+                            st.text(f"{i}. {step}")
                 
                 # Add timestamp for each message
                 if "timestamp" in message:
@@ -146,7 +168,7 @@ class ChatbotApp:
         
         # Generate and display assistant response
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner("🤖 ReAct Agent is thinking..."):
                 try:
                     # Process message through conversation graph
                     response_data = self.conversation_graph.chat(
@@ -156,10 +178,18 @@ class ChatbotApp:
                     
                     bot_response = response_data.get("response", "I'm sorry, I couldn't generate a response.")
                     error = response_data.get("error", "")
+                    intermediate_steps = response_data.get("intermediate_steps", [])
+                    tools_used = response_data.get("tools_used", 0)
                     
                     if error:
                         logger.error(f"Error in chat processing: {error}")
                         st.error("An error occurred while processing your message.")
+                    
+                    # Display intermediate steps if any
+                    if intermediate_steps:
+                        with st.expander(f"🔍 ReAct Process ({len(intermediate_steps)} steps, {tools_used} tools used)", expanded=False):
+                            for i, step in enumerate(intermediate_steps, 1):
+                                st.text(f"{i}. {step}")
                     
                     # Display bot response
                     st.markdown(bot_response)
@@ -169,7 +199,9 @@ class ChatbotApp:
                     st.session_state.messages.append({
                         "role": "assistant",
                         "content": bot_response,
-                        "timestamp": bot_timestamp
+                        "timestamp": bot_timestamp,
+                        "intermediate_steps": intermediate_steps,
+                        "tools_used": tools_used
                     })
                     
                     st.caption(f"*{bot_timestamp}*")
@@ -232,16 +264,17 @@ class ChatbotApp:
             if not st.session_state.conversation_started and not st.session_state.messages:
                 with st.chat_message("assistant"):
                     welcome_message = """
-                    👋 Hello! I'm your AI assistant. I'm here to help you with any questions or have a conversation.
+                    👋 Hello! I'm your Zwigato customer support assistant. I'm here to help you with any questions about your orders, deliveries, membership benefits, and more.
                     
-                    Feel free to ask me about:
-                    - General questions and topics
-                    - Creative writing or brainstorming
-                    - Explanations of concepts
-                    - Advice and recommendations
-                    - Or just chat about anything!
+                    I can help you with:
+                    - Order status and tracking
+                    - Cancellations and refunds
+                    - Zwigato Gold membership benefits
+                    - Delivery policies and fees
+                    - Restaurant and menu information
+                    - General customer support
                     
-                    What would you like to talk about today?
+                    How can I assist you today?
                     """
                     st.markdown(welcome_message)
                     

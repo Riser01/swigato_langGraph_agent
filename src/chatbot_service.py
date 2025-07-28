@@ -1,5 +1,6 @@
 import os
-from typing import Dict, Any
+import re
+from typing import Dict, Any, List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -19,29 +20,77 @@ class ChatbotService:
         if not self.api_key:
             raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY environment variable.")
         
+        # Get model from environment variable or use default
+        model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+        
         # Initialize the OpenAI chat model
         self.llm = ChatOpenAI(
-            model="gpt-3.5-turbo",
+            model=model_name,
             temperature=0.7,
             api_key=self.api_key,
             streaming=True  # Enable streaming for better user experience
         )
         
+        # MCP tools will be set later
+        self.mcp_tools = []
+        
         # Define the system prompt template
         self.prompt_template = ChatPromptTemplate.from_messages([
-            ("system", """You are a helpful AI assistant. You are engaging, friendly, and knowledgeable.
-            
-            Guidelines:
-            - Be conversational and natural
-            - Provide helpful and accurate information
-            - If you don't know something, admit it honestly
-            - Keep responses concise but informative
-            - Maintain context from previous messages in the conversation
+            ("system", """<ROLE>
+You are a smart agent with an ability to use tools. 
+You will be given a question and you will use the tools to answer the question.
+Pick the most relevant tool to answer the question. 
+If you are failed to answer the question, try different tools to get context.
+Your answer should be very polite and professional.
+</ROLE>
+----
+<INSTRUCTIONS>
+Step 1: Analyze the question
+- Analyze user's question and final goal.
+- If the user's question is consist of multiple sub-questions, split them into smaller sub-questions.
+
+Step 2: Pick the most relevant tool
+- Pick the most relevant tool to answer the question.
+- If you are failed to answer the question, try different tools to get context.
+
+Step 3: Answer the question
+- Answer the question in the same language as the question.
+- Your answer should be very polite and professional.
+
+Step 4: Provide the source of the answer(if applicable)
+- If you've used the tool, provide the source of the answer.
+- Valid sources are either a website(URL) or a document(PDF, etc).
+
+Guidelines:
+- If you've used the tool, your answer should be based on the tool's output(tool's output is more important than your own knowledge).
+- If you've used the tool, and the source is valid URL, provide the source(URL) of the answer.
+- Skip providing the source if the source is not URL.
+- Answer in the same language as the question.
+- Answer should be concise and to the point.
+- Avoid response your output with any other information than the answer and the source.  
+</INSTRUCTIONS>
+----
+<OUTPUT_FORMAT>
+(concise answer to the question)
+
+
+</OUTPUT_FORMAT>
             
             Current conversation turn: {turn_count}
-            Context: {context}"""),
+            Context: {context}
+            Tool Results: {tool_results}"""),
             ("human", "{user_input}")
         ])
+    
+    def set_mcp_tools(self, tools: List):
+        """
+        Set the MCP tools for this service.
+        
+        Args:
+            tools: List of MCP tools
+        """
+        self.mcp_tools = tools
+        logger.info(f"Set {len(tools)} MCP tools for chatbot service")
     
     def process_message(self, state: ChatState) -> Dict[str, Any]:
         """

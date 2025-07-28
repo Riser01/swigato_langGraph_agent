@@ -1,13 +1,14 @@
-# 🤖 AI Chatbot MVP - Project Status
+# 🍕 Zwigato Customer Support Agent - Project Status
 
 ## ✅ Project Successfully Created!
 
-Your AI Chatbot MVP has been successfully created with all the requested features:
+Your Zwigato Customer Support Agent has been successfully created with all the requested features:
 
 ### 🏗️ **Architecture Implemented**
 - ✅ **Frontend**: Streamlit with modern chat interface
 - ✅ **Backend**: LangGraph for conversation flow management
-- ✅ **LLM Integration**: OpenAI API (GPT-3.5-turbo)
+- ✅ **LLM Integration**: OpenAI API (configurable model)
+- ✅ **MCP Tools**: Customer support tools integration
 - ✅ **Containerization**: Complete Docker setup
 
 ### 📁 **Project Structure**
@@ -54,7 +55,7 @@ swigato_docker/
 - Session-based conversation tracking
 
 #### 🧠 **LLM Integration (OpenAI)**
-- GPT-3.5-turbo model integration
+- Configurable OpenAI model integration (default: gpt-4.1)
 - Streaming responses for better UX
 - Context-aware conversations with history
 - Configurable prompts and system messages
