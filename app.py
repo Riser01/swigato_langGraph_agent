@@ -119,13 +119,13 @@ class ChatbotApp:
                 provider_preference = os.getenv("PROVIDER_PREFERENCE", "openai").lower()
                 
                 if provider_preference == "openai" and openai_api_key:
-                    model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+                    model_name = os.getenv("MODEL", "gpt-4o")
                     st.write(f"**LLM:** OpenAI {model_name}")
                 elif google_api_key:
                     fallback_model = os.getenv("FALLBACK_MODEL", "gemini-1.5-flash")
                     st.write(f"**LLM:** Google Gemini {fallback_model}")
                 elif openai_api_key:
-                    model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+                    model_name = os.getenv("MODEL", "gpt-4o")
                     st.write(f"**LLM:** OpenAI {model_name} (fallback)")
                 else:
                     st.write("**LLM:** ❌ Not configured")

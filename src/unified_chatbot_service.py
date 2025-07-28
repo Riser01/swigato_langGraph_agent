@@ -159,7 +159,7 @@ Source: (if applicable)
         # Prefer OpenAI if available and preference is set to openai
         if provider_preference == "openai" and openai_api_key:
             try:
-                model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+                model_name = os.getenv("MODEL", "gpt-4o")
                 logger.info(f"Using OpenAI: {model_name}")
                 return ChatOpenAI(
                     model=model_name,
@@ -173,7 +173,7 @@ Source: (if applicable)
         # Fallback to Google Gemini
         if google_api_key:
             try:
-                model_name = os.getenv("GOOGLE_MODEL", "gemini-pro")
+                model_name = os.getenv("FALLBACK_MODEL", "gemini-1.5-flash")
                 logger.info(f"Using Google Gemini: {model_name}")
                 return ChatGoogleGenerativeAI(
                     model=model_name,
@@ -187,7 +187,7 @@ Source: (if applicable)
         # Try OpenAI as last resort if Google Gemini failed
         if openai_api_key:
             try:
-                model_name = os.getenv("MODEL", "gpt-3.5-turbo")
+                model_name = os.getenv("MODEL", "gpt-4o")
                 logger.info(f"Using OpenAI as fallback: {model_name}")
                 return ChatOpenAI(
                     model=model_name,
