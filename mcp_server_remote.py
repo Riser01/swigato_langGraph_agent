@@ -4,11 +4,12 @@ from mcp.server.fastmcp import FastMCP
 
 # --- Import Zwigato Mock Data Sources ---
 from data import (
-    _MOCK_ORDERS_DB,
     _MOCK_WIKI_DB,
     _MOCK_RESTAURANTS_DB,
     _MOCK_DELIVERY_AGENTS_DB # Though not directly used in tools yet, good to import if related
 )
+# Use persistent order database instead of mock
+from persistent_data import persistent_orders_db
 
 # --- MCP Server Setup ---
 SERVER_HOST = "0.0.0.0"
@@ -70,7 +71,7 @@ async def read_order_status(order_id: str) -> str:
         str: A message indicating the order details and status, or an error if the order is not found.
     """
     print(f"[MCP Order Server] Received read_order_status request for order_id: '{order_id}'")
-    order = _MOCK_ORDERS_DB.get(order_id)
+    order = persistent_orders_db.get(order_id)
     if order:
         restaurant_name = "Unknown Restaurant"
         if order.get("restaurant_id") and order["restaurant_id"] in _MOCK_RESTAURANTS_DB:
@@ -107,7 +108,7 @@ async def update_order_status(order_id: str, new_status: str) -> str:
         str: A confirmation message if the update was successful, or an error/reason if not.
     """
     print(f"[MCP Order Server] Received update_order_status request for order_id: '{order_id}', new_status: '{new_status}'")
-    order = _MOCK_ORDERS_DB.get(order_id) # _MOCK_ORDERS_DB is now imported
+    order = persistent_orders_db.get(order_id)
 
     if not order:
         error_message = f"Sorry, I could not find a Zwigato order with ID '{order_id}' to update."
@@ -121,14 +122,21 @@ async def update_order_status(order_id: str, new_status: str) -> str:
         cancellable_statuses = ["order placed", "awaiting rider assignment"]
 
         if current_status_lower in cancellable_statuses:
-            order["status"] = "Cancelled"
-            order["estimated_delivery_time"] = None
-            # _MOCK_ORDERS_DB[order_id] = order # This line might not be strictly necessary if 'order' is a reference
-                                              # to the dictionary item, but it's safer to be explicit for mutable operations
-                                              # on shared data structures like dictionaries.
-            message = f"Order '{order_id}' has been successfully cancelled."
-            print(f"[MCP Order Server] {message}")
-            return message
+            # Use persistent database to update and save
+            update_result = persistent_orders_db.update(order_id, {
+                "status": "Cancelled",
+                "estimated_delivery_time": None
+            })
+            
+            if update_result:
+                message = f"Order '{order_id}' has been successfully cancelled."
+                print(f"[MCP Order Server] {message}")
+                print(f"[MCP Order Server] Order status persisted to database")
+                return message
+            else:
+                error_message = f"Failed to update order '{order_id}' in database."
+                print(f"[MCP Order Server] {error_message}")
+                return error_message
         elif current_status_lower == "cancelled":
             message = f"Order '{order_id}' is already cancelled."
             print(f"[MCP Order Server] {message}")

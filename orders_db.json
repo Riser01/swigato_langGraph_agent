@@ -1,0 +1,344 @@
+{
+  "ORDZW001": {
+    "status": "Order Placed",
+    "items": [
+      "Pepperoni Pizza (Large)",
+      "Coke (2L)"
+    ],
+    "customer_id": "cust001",
+    "restaurant_id": "rest001",
+    "delivery_address": "123 Main St, Metroville, 12345",
+    "delivery_agent_id": null,
+    "order_total": 25.99,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": "30-40 mins",
+    "special_instructions": "Extra cheese on pizza."
+  },
+  "ORDZW002": {
+    "status": "Out for Delivery",
+    "items": [
+      "Classic Cheeseburger",
+      "Fries (Large)"
+    ],
+    "customer_id": "cust002",
+    "restaurant_id": "rest002",
+    "delivery_address": "456 Oak Ave, Metroville, 12346",
+    "delivery_agent_id": "agent01",
+    "order_total": 18.5,
+    "payment_method": "PayPal",
+    "estimated_delivery_time": "10-15 mins remaining",
+    "special_instructions": "No pickles on burger."
+  },
+  "ORDZW003": {
+    "status": "Delivered",
+    "items": [
+      "Salmon Sushi Set",
+      "Miso Soup"
+    ],
+    "customer_id": "cust001",
+    "restaurant_id": "rest003",
+    "delivery_address": "123 Main St, Metroville, 12345",
+    "delivery_agent_id": "agent02",
+    "order_total": 32.75,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": "Delivered 5 mins ago",
+    "special_instructions": null
+  },
+  "ORDZW004": {
+    "status": "Cancelled",
+    "items": [
+      "Chicken Tikka Masala",
+      "Naan Bread"
+    ],
+    "customer_id": "cust003",
+    "restaurant_id": "rest004",
+    "delivery_address": "789 Pine Rd, Suburbia, 54321",
+    "delivery_agent_id": null,
+    "order_total": 22.0,
+    "payment_method": "COD",
+    "estimated_delivery_time": null,
+    "special_instructions": "Make it spicy."
+  },
+  "ORDZW005": {
+    "status": "Restaurant Preparing",
+    "items": [
+      "Caesar Salad (Chicken)",
+      "Iced Tea"
+    ],
+    "customer_id": "cust004",
+    "restaurant_id": "rest005",
+    "delivery_address": "101 Maple Dr, Metroville, 12347",
+    "delivery_agent_id": null,
+    "order_total": 15.25,
+    "payment_method": "Zwigato Wallet",
+    "estimated_delivery_time": "40-50 mins",
+    "special_instructions": "Dressing on the side."
+  },
+  "ORDZW006": {
+    "status": "Delivered",
+    "items": [
+      "Beef Tacos (3)",
+      "Guacamole & Chips"
+    ],
+    "customer_id": "cust005",
+    "restaurant_id": "rest006",
+    "delivery_address": "222 Birch Ln, Suburbia, 54322",
+    "delivery_agent_id": "agent03",
+    "order_total": 19.8,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": "Delivered 20 mins ago",
+    "special_instructions": "Extra hot sauce."
+  },
+  "ORDZW007": {
+    "status": "Out for Delivery",
+    "items": [
+      "Pad Thai (Shrimp)"
+    ],
+    "customer_id": "cust002",
+    "restaurant_id": "rest007",
+    "delivery_address": "456 Oak Ave, Metroville, 12346",
+    "delivery_agent_id": "agent04",
+    "order_total": 16.5,
+    "payment_method": "PayPal",
+    "estimated_delivery_time": "5-10 mins remaining",
+    "special_instructions": "No peanuts."
+  },
+  "ORDZW008": {
+    "status": "Delivered",
+    "items": [
+      "Chocolate Lava Cake",
+      "Vanilla Ice Cream (Scoop)"
+    ],
+    "customer_id": "cust006",
+    "restaurant_id": "rest008",
+    "delivery_address": "333 Willow Cr, Metroville, 12348",
+    "delivery_agent_id": "agent01",
+    "order_total": 12.0,
+    "payment_method": "Debit Card",
+    "estimated_delivery_time": "Delivered 1 hour ago",
+    "special_instructions": null
+  },
+  "ORDZW009": {
+    "status": "Order Placed",
+    "items": [
+      "Margherita Pizza (Medium)",
+      "Garlic Bread"
+    ],
+    "customer_id": "cust007",
+    "restaurant_id": "rest001",
+    "delivery_address": "414 Cedar Pl, Suburbia, 54323",
+    "delivery_agent_id": null,
+    "order_total": 20.5,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": "35-45 mins",
+    "special_instructions": "Thin crust please."
+  },
+  "ORDZW010": {
+    "status": "Issue Reported",
+    "items": [
+      "Veggie Burger",
+      "Sweet Potato Fries"
+    ],
+    "customer_id": "cust002",
+    "restaurant_id": "rest002",
+    "delivery_address": "456 Oak Ave, Metroville, 12346",
+    "delivery_agent_id": "agent02",
+    "order_total": 17.0,
+    "payment_method": "PayPal",
+    "estimated_delivery_time": "Resolved",
+    "special_instructions": "Customer reported missing fries, partial refund processed."
+  },
+  "ORDZW011": {
+    "status": "Awaiting Rider Assignment",
+    "items": [
+      "California Roll",
+      "Edamame"
+    ],
+    "customer_id": "cust008",
+    "restaurant_id": "rest003",
+    "delivery_address": "505 Spruce St, Metroville, 12349",
+    "delivery_agent_id": null,
+    "order_total": 24.0,
+    "payment_method": "Zwigato Wallet",
+    "estimated_delivery_time": null,
+    "special_instructions": "Extra ginger and wasabi."
+  },
+  "ORDZW012": {
+    "status": "Payment Failed",
+    "items": [
+      "Butter Chicken",
+      "Garlic Naan (2)"
+    ],
+    "customer_id": "cust009",
+    "restaurant_id": "rest004",
+    "delivery_address": "606 Redwood Ave, Suburbia, 54324",
+    "delivery_agent_id": null,
+    "order_total": 28.5,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": null,
+    "special_instructions": "Mild spice level."
+  },
+  "ORDZW013": {
+    "status": "Delivered",
+    "items": [
+      "Greek Salad",
+      "Hummus with Pita"
+    ],
+    "customer_id": "cust010",
+    "restaurant_id": "rest005",
+    "delivery_address": "707 Elm Rd, Metroville, 12350",
+    "delivery_agent_id": "agent03",
+    "order_total": 18.75,
+    "payment_method": "COD",
+    "estimated_delivery_time": "Delivered 30 mins ago",
+    "special_instructions": null
+  },
+  "ORDZW014": {
+    "status": "Restaurant Preparing",
+    "items": [
+      "Chicken Burrito Bowl"
+    ],
+    "customer_id": "cust011",
+    "restaurant_id": "rest006",
+    "delivery_address": "808 Aspen Ct, Suburbia, 54325",
+    "delivery_agent_id": null,
+    "order_total": 14.99,
+    "payment_method": "Debit Card",
+    "estimated_delivery_time": "30-40 mins",
+    "special_instructions": "No beans, add extra salsa."
+  },
+  "ORDZW015": {
+    "status": "Out for Delivery",
+    "items": [
+      "Ramen (Tonkotsu)",
+      "Gyoza (Pork)"
+    ],
+    "customer_id": "cust012",
+    "restaurant_id": "rest007",
+    "delivery_address": "909 Fir Way, Metroville, 12351",
+    "delivery_agent_id": "agent04",
+    "order_total": 29.2,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": "15-20 mins remaining",
+    "special_instructions": "Extra noodles."
+  },
+  "ORDZW016": {
+    "status": "Delivered",
+    "items": [
+      "Red Velvet Cupcake (Box of 4)"
+    ],
+    "customer_id": "cust013",
+    "restaurant_id": "rest008",
+    "delivery_address": "111 Juniper Pl, Suburbia, 54326",
+    "delivery_agent_id": "agent01",
+    "order_total": 16.0,
+    "payment_method": "Zwigato Wallet",
+    "estimated_delivery_time": "Delivered 45 mins ago",
+    "special_instructions": "Happy Birthday message on box."
+  },
+  "ORDZW017": {
+    "status": "Cancelled by Restaurant",
+    "items": [
+      "Supreme Pizza (Family Size)"
+    ],
+    "customer_id": "cust014",
+    "restaurant_id": "rest001",
+    "delivery_address": "222 Sycamore Dr, Metroville, 12352",
+    "delivery_agent_id": null,
+    "order_total": 35.5,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": null,
+    "special_instructions": "Sorry, restaurant is out of a key ingredient."
+  },
+  "ORDZW018": {
+    "status": "Order Placed",
+    "items": [
+      "Double Bacon Cheeseburger Meal (Large)"
+    ],
+    "customer_id": "cust015",
+    "restaurant_id": "rest002",
+    "delivery_address": "333 Magnolia Ave, Suburbia, 54327",
+    "delivery_agent_id": null,
+    "order_total": 21.75,
+    "payment_method": "PayPal",
+    "estimated_delivery_time": "40-50 mins",
+    "special_instructions": "Extra crispy bacon."
+  },
+  "ORDZW019": {
+    "status": "Awaiting Rider Assignment",
+    "items": [
+      "Tuna Sashimi",
+      "Seaweed Salad"
+    ],
+    "customer_id": "cust016",
+    "restaurant_id": "rest003",
+    "delivery_address": "444 Poplar St, Metroville, 12353",
+    "delivery_agent_id": null,
+    "order_total": 27.8,
+    "payment_method": "Debit Card",
+    "estimated_delivery_time": "35-45 mins",
+    "special_instructions": null
+  },
+  "ORDZW020": {
+    "status": "Delivered",
+    "items": [
+      "Paneer Butter Masala",
+      "Rice",
+      "Mango Lassi"
+    ],
+    "customer_id": "cust017",
+    "restaurant_id": "rest004",
+    "delivery_address": "555 Chestnut Rd, Suburbia, 54328",
+    "delivery_agent_id": "agent02",
+    "order_total": 30.15,
+    "payment_method": "COD",
+    "estimated_delivery_time": "Delivered 10 mins ago",
+    "special_instructions": "Not too oily please."
+  },
+  "ORDZW021": {
+    "status": "Out for Delivery",
+    "items": [
+      "Quinoa Bowl (Vegan)",
+      "Fresh Orange Juice"
+    ],
+    "customer_id": "cust018",
+    "restaurant_id": "rest005",
+    "delivery_address": "666 Hemlock Cr, Metroville, 12354",
+    "delivery_agent_id": "agent03",
+    "order_total": 19.9,
+    "payment_method": "Zwigato Wallet",
+    "estimated_delivery_time": "5-10 mins remaining",
+    "special_instructions": "Ensure cutlery is included."
+  },
+  "ORDZW022": {
+    "status": "Restaurant Preparing",
+    "items": [
+      "Fish Tacos (2)",
+      "Chicken Quesadilla"
+    ],
+    "customer_id": "cust019",
+    "restaurant_id": "rest006",
+    "delivery_address": "777 Cypress Ln, Suburbia, 54329",
+    "delivery_agent_id": null,
+    "order_total": 23.4,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": "25-35 mins",
+    "special_instructions": "Separate containers for tacos and quesadilla."
+  },
+  "ORDZW023": {
+    "status": "Delivered",
+    "items": [
+      "Spicy Miso Ramen",
+      "Edamame",
+      "Green Tea"
+    ],
+    "customer_id": "cust005",
+    "restaurant_id": "rest007",
+    "delivery_address": "222 Birch Ln, Suburbia, 54322",
+    "delivery_agent_id": "agent04",
+    "order_total": 26.5,
+    "payment_method": "Credit Card",
+    "estimated_delivery_time": "Delivered 15 mins ago",
+    "special_instructions": "Extra spicy broth."
+  }
+}

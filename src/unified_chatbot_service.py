@@ -185,6 +185,7 @@ Be polite, professional, and helpful in all your responses."""
 
                 self._mcp_client = MultiServerMCPClient(self.mcp_config)
                 logger.info("✅ MCP client created successfully")
+                logger.info(f"🔧 MCP Config: {self.mcp_config}")
 
                 self.mcp_tools = await self._mcp_client.get_tools()
                 logger.info("✅ MCP tools retrieved successfully")
